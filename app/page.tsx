@@ -25,12 +25,10 @@ export default function PlayPage() {
   const [result, setResult] = useState('');
 
   useEffect(() => {
-    // Same cat for everyone on the same day
     const daySeed = new Date().getDate();
     const index = daySeed % catImages.length;
     setDailyCat(catImages[index]);
 
-    // Check if already played today
     const played = localStorage.getItem('polymeow_played');
     if (played === today) {
       setHasPlayed(true);
@@ -51,7 +49,9 @@ export default function PlayPage() {
     }
   };
 
-  if (!dailyCat) return <p className="text-center p-10">Loading today's cat...</p>;
+  if (!dailyCat) {
+    return <p className="text-center p-10">Loading today's cat...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-100 to-yellow-100 flex flex-col items-center justify-center p-4">
@@ -63,4 +63,25 @@ export default function PlayPage() {
       </div>
 
       {!hasPlayed ? (
-        <div className="flex gap
+        <div className="flex gap-8">
+          <button onClick={() => handleGuess('Silver')} className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition">
+            Silver 💰
+          </button>
+          <button onClick={() => handleGuess('Gold')} className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition">
+            Gold 🪙
+          </button>
+        </div>
+      ) : (
+        <div className="text-center">
+          <p className="text-2xl font-bold mb-4">{result}</p>
+          <p className="text-lg">Total Score: {localStorage.getItem('polymeow_score') || '0'}</p>
+          <p className="text-sm text-gray-600 mt-4">Come back tomorrow for a new cat!</p>
+        </div>
+      )}
+
+      <a href="/leaderboard" className="mt-10 text-blue-600 underline text-lg">
+        View Leaderboard
+      </a>
+    </div>
+  );
+}
