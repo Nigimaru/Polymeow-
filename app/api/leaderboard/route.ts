@@ -1,14 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// ตัวอย่างข้อมูล leaderboard
-const leaderboardData = [
-  { username: 'You', score: 10 },
-  { username: 'Player1', score: 150 },
-  { username: 'Player2', score: 140 },
-];
-
-export async function GET() {
-  // เรียงจากคะแนนมากไปน้อย
-  const sorted = leaderboardData.sort((a, b) => b.score - a.score);
-  return NextResponse.json(sorted);
+export async function GET(req: NextRequest) {
+  const res = await fetch('https://dev.neynar.com/api/leaderboard', {
+    headers: {
+      'Authorization': `Bearer ${process.env.NEY_API_KEY}`
+    }
+  });
+  const data = await res.json();
+  return NextResponse.json(data);
 }
