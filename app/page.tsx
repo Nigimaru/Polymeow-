@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getLeaderboard } from '@neynar/react';
 
 const catImages = [
   { url: 'https://files.catbox.moe/l4r444.jpg', name: 'Silver' },
@@ -22,32 +21,13 @@ export default function PlayPage() {
   const [dailyCat, setDailyCat] = useState<any>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [result, setResult] = useState('');
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
-  // เลือกแมวประจำวัน
   useEffect(() => {
-    const daySeed = new Date().getDate();
-    const index = daySeed % catImages.length;
+    const index = new Date().getDate() % catImages.length;
     setDailyCat(catImages[index]);
 
     const played = localStorage.getItem('polymeow_played');
     if (played === today) setHasPlayed(true);
-  }, []);
-
-  // ดึง Leaderboard จาก Neynar
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const data = await getLeaderboard({
-          clientId: process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID,
-          game: 'polymeow',
-        });
-        setLeaderboard(data);
-      } catch (err) {
-        console.error('Failed to fetch leaderboard', err);
-      }
-    };
-    fetchLeaderboard();
   }, []);
 
   const handleGuess = (guess: string) => {
@@ -75,8 +55,8 @@ export default function PlayPage() {
         <Image
           src={dailyCat.url}
           alt="Today's Cat"
-          width={320}
-          height={320}
+          width={320}   // กำหนดความกว้าง
+          height={320}  // กำหนดความสูง
           className="object-cover rounded-2xl"
           priority
         />
@@ -105,20 +85,9 @@ export default function PlayPage() {
         </div>
       )}
 
-      <h2 className="text-2xl font-bold mt-10 mb-4">Leaderboard</h2>
-      <div className="w-full max-w-md bg-white p-4 rounded-xl shadow-lg">
-        {leaderboard.length === 0 ? (
-          <p className="text-center text-gray-500">No players yet</p>
-        ) : (
-          <ol className="list-decimal list-inside">
-            {leaderboard.map((player, idx) => (
-              <li key={idx} className="mb-1">
-                {player.name} – {player.score}
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
+      <a href="/leaderboard" className="mt-10 text-blue-600 underline text-lg">
+        View Leaderboard
+      </a>
     </div>
   );
 }
