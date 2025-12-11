@@ -29,7 +29,7 @@ export default function PlayPage() {
 
     if (localStorage.getItem('polymeow_played') === today) setHasPlayed(true);
 
-    // โหลด leaderboard ผ่าน fetch API
+    // โหลด leaderboard
     fetch('/api/leaderboard')
       .then(r => r.json())
       .then(data => setLeaders(data))
@@ -48,14 +48,12 @@ export default function PlayPage() {
       const score = Number(localStorage.getItem('polymeow_score') || '0') + 10;
       localStorage.setItem('polymeow_score', score.toString());
 
-      // ส่งคะแนนไป API ของเรา
       await fetch('/api/submit-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ score }),
       });
 
-      // รีโหลด leaderboard
       const data = await fetch('/api/leaderboard').then(r => r.json());
       setLeaders(data);
     }
@@ -64,43 +62,49 @@ export default function PlayPage() {
   if (!dailyCat) return <p className="text-center p-10">Loading today's cat...</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-100 to-yellow-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-8 text-purple-800">Polymeow 🐱</h1>
-      <p className="text-lg mb-6 text-gray-700">Is this cat "Silver" or "Gold"?</p>
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 via-pink-100 to-green-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-4xl font-extrabold mb-6 text-purple-700">Polymeow 🐱</h1>
+      <p className="text-lg mb-6 text-gray-800">Is this cat "Silver" or "Gold"?</p>
 
-      <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="mb-6 rounded-3xl overflow-hidden shadow-xl border-4 border-pink-200">
         <Image
           src={dailyCat.url}
           alt="Today's Cat"
-          width={320}
-          height={320}
-          className="object-cover rounded-2xl"
+          width={300}
+          height={300}
+          className="object-cover rounded-3xl"
           priority
         />
       </div>
 
       {!hasPlayed ? (
-        <div className="flex gap-8">
-          <button onClick={() => handleGuess('Silver')} className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition">
+        <div className="flex gap-6">
+          <button
+            onClick={() => handleGuess('Silver')}
+            className="bg-blue-400 text-white px-10 py-4 rounded-2xl text-xl font-bold shadow-md hover:bg-blue-500 transition"
+          >
             Silver 💰
           </button>
-          <button onClick={() => handleGuess('Gold')} className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition">
+          <button
+            onClick={() => handleGuess('Gold')}
+            className="bg-yellow-400 text-white px-10 py-4 rounded-2xl text-xl font-bold shadow-md hover:bg-yellow-500 transition"
+          >
             Gold 🪙
           </button>
         </div>
       ) : (
         <div className="text-center">
-          <p className="text-2xl font-bold mb-4">{result}</p>
+          <p className="text-2xl font-bold mb-3">{result}</p>
           <p className="text-lg">Total Score: {localStorage.getItem('polymeow_score') || '0'}</p>
-          <p className="text-sm text-gray-600 mt-4">Come back tomorrow for a new cat!</p>
+          <p className="text-sm text-gray-600 mt-2">Come back tomorrow for a new cat!</p>
         </div>
       )}
 
-      <div className="mt-10 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Weekly Top 20</h2>
-        <ol className="list-decimal list-inside">
+      <div className="mt-8 w-full max-w-md bg-white p-4 rounded-2xl shadow-lg">
+        <h2 className="text-2xl font-bold mb-3 text-center text-purple-600">Weekly Top 20</h2>
+        <ol className="list-decimal list-inside space-y-1">
           {leaders.map((l, i) => (
-            <li key={i}>{l.username} – {l.score}</li>
+            <li key={i} className="text-gray-800">{l.username} – {l.score}</li>
           ))}
         </ol>
       </div>
