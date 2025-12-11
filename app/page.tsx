@@ -48,7 +48,7 @@ export default function PlayPage() {
       const score = Number(localStorage.getItem('polymeow_score') || '0') + 10;
       localStorage.setItem('polymeow_score', score.toString());
 
-      // ส่งคะแนนไป API ของเรา (ที่เชื่อม Neynar)
+      // ส่งคะแนนไป API ของเรา
       await fetch('/api/submit-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
