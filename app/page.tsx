@@ -58,16 +58,29 @@ export default function PlayPage() {
       <h1 className="text-4xl font-bold mb-8 text-purple-800">Polymeow 🐱</h1>
       <p className="text-lg mb-6 text-gray-700">Is this cat "Silver" or "Gold"?</p>
       
-      <div className="relative w-80 h-80 md:w-96 md:h-96 mb-8 rounded-2xl overflow-hidden shadow-2xl">
-        <Image src={dailyCat.url} alt="Today's Cat" fill className="object-cover" priority />
+      <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
+        <Image
+          src={dailyCat.url}
+          alt="Today's Cat"
+          width={320}    // กำหนดความกว้าง
+          height={320}   // กำหนดความสูง
+          className="object-cover rounded-2xl"
+          priority
+        />
       </div>
 
       {!hasPlayed ? (
         <div className="flex gap-8">
-          <button onClick={() => handleGuess('Silver')} className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition">
+          <button
+            onClick={() => handleGuess('Silver')}
+            className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition"
+          >
             Silver 💰
           </button>
-          <button onClick={() => handleGuess('Gold')} className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition">
+          <button
+            onClick={() => handleGuess('Gold')}
+            className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition"
+          >
             Gold 🪙
           </button>
         </div>
