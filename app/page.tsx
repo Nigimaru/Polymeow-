@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { getLeaderboard, submitScore } from '@neynar/react';
 
 const catImages = [
   { url: 'https://files.catbox.moe/l4r444.jpg', name: 'Silver' },
@@ -21,16 +22,21 @@ export default function PlayPage() {
   const [dailyCat, setDailyCat] = useState<any>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [result, setResult] = useState('');
+  const [leaders, setLeaders] = useState<any[]>([]);
 
+  // เลือกแมวของวันนี้ + เช็คเล่นแล้ว
   useEffect(() => {
     const index = new Date().getDate() % catImages.length;
     setDailyCat(catImages[index]);
 
     const played = localStorage.getItem('polymeow_played');
     if (played === today) setHasPlayed(true);
+
+    // โหลด leaderboard
+    getLeaderboard('weekly').then(data => setLeaders(data));
   }, []);
 
-  const handleGuess = (guess: string) => {
+  const handleGuess = async (guess: string) => {
     if (hasPlayed) return;
 
     const correct = guess === dailyCat.name;
@@ -41,6 +47,12 @@ export default function PlayPage() {
     if (correct) {
       const score = Number(localStorage.getItem('polymeow_score') || '0') + 10;
       localStorage.setItem('polymeow_score', score.toString());
+
+      // ส่งคะแนนจริงไป Neynar (0.01 PMEOW)
+      await submitScore(score, 'PMEOW');
+      // รีโหลด leaderboard
+      const data = await getLeaderboard('weekly');
+      setLeaders(data);
     }
   };
 
@@ -55,8 +67,8 @@ export default function PlayPage() {
         <Image
           src={dailyCat.url}
           alt="Today's Cat"
-          width={320}   // กำหนดความกว้าง
-          height={320}  // กำหนดความสูง
+          width={320}
+          height={320}
           className="object-cover rounded-2xl"
           priority
         />
@@ -85,9 +97,14 @@ export default function PlayPage() {
         </div>
       )}
 
-      <a href="/leaderboard" className="mt-10 text-blue-600 underline text-lg">
-        View Leaderboard
-      </a>
+      <div className="mt-10 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4 text-center">Weekly Top 20</h2>
+        <ol className="list-decimal list-inside">
+          {leaders.map((l, i) => (
+            <li key={i}>{l.username} – {l.score}</li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
