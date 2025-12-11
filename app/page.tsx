@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getLeaderboard, submitScore } from '@neynar/react';
 
 const catImages = [
   { url: 'https://files.catbox.moe/l4r444.jpg', name: 'Silver' },
@@ -24,16 +23,17 @@ export default function PlayPage() {
   const [result, setResult] = useState('');
   const [leaders, setLeaders] = useState<any[]>([]);
 
-  // เลือกแมวของวันนี้ + เช็คเล่นแล้ว
   useEffect(() => {
     const index = new Date().getDate() % catImages.length;
     setDailyCat(catImages[index]);
 
-    const played = localStorage.getItem('polymeow_played');
-    if (played === today) setHasPlayed(true);
+    if (localStorage.getItem('polymeow_played') === today) setHasPlayed(true);
 
-    // โหลด leaderboard
-    getLeaderboard('weekly').then(data => setLeaders(data));
+    // โหลด leaderboard ผ่าน fetch API
+    fetch('/api/leaderboard')
+      .then(r => r.json())
+      .then(data => setLeaders(data))
+      .catch(() => setLeaders([]));
   }, []);
 
   const handleGuess = async (guess: string) => {
@@ -48,10 +48,15 @@ export default function PlayPage() {
       const score = Number(localStorage.getItem('polymeow_score') || '0') + 10;
       localStorage.setItem('polymeow_score', score.toString());
 
-      // ส่งคะแนนจริงไป Neynar (0.01 PMEOW)
-      await submitScore(score, 'PMEOW');
+      // ส่งคะแนนไป API ของเรา (ที่เชื่อม Neynar)
+      await fetch('/api/submit-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score }),
+      });
+
       // รีโหลด leaderboard
-      const data = await getLeaderboard('weekly');
+      const data = await fetch('/api/leaderboard').then(r => r.json());
       setLeaders(data);
     }
   };
@@ -76,16 +81,10 @@ export default function PlayPage() {
 
       {!hasPlayed ? (
         <div className="flex gap-8">
-          <button
-            onClick={() => handleGuess('Silver')}
-            className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition"
-          >
+          <button onClick={() => handleGuess('Silver')} className="bg-green-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-green-600 transition">
             Silver 💰
           </button>
-          <button
-            onClick={() => handleGuess('Gold')}
-            className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition"
-          >
+          <button onClick={() => handleGuess('Gold')} className="bg-yellow-500 text-white px-12 py-6 rounded-full text-2xl font-bold shadow-lg hover:bg-yellow-600 transition">
             Gold 🪙
           </button>
         </div>
