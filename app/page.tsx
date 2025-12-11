@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { getLeaderboard } from '@neynar/react';
 
 const catImages = [
-  // Silver - 4 images
   { url: 'https://files.catbox.moe/l4r444.jpg', name: 'Silver' },
   { url: 'https://files.catbox.moe/kl7pv4.jpg', name: 'Silver' },
   { url: 'https://files.catbox.moe/jpqo2x.jpg', name: 'Silver' },
   { url: 'https://files.catbox.moe/en8r9m.jpg', name: 'Silver' },
-  // Gold - 6 images
   { url: 'https://files.catbox.moe/87f8ur.jpg', name: 'Gold' },
   { url: 'https://files.catbox.moe/m0hd8j.jpg', name: 'Gold' },
   { url: 'https://files.catbox.moe/0kzv7j.jpg', name: 'Gold' },
@@ -25,7 +24,7 @@ export default function PlayPage() {
   const [result, setResult] = useState('');
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
-  // เลือกแมววันนี้
+  // เลือกแมวประจำวัน
   useEffect(() => {
     const daySeed = new Date().getDate();
     const index = daySeed % catImages.length;
@@ -37,17 +36,17 @@ export default function PlayPage() {
 
   // ดึง Leaderboard จาก Neynar
   useEffect(() => {
-    async function fetchLeaderboard() {
+    const fetchLeaderboard = async () => {
       try {
-        const res = await fetch(
-          'https://dev.neynar.com/api/v1/apps/90b276a3-7b6d-4f2c-9248-bb95a4dac64c/leaderboard'
-        );
-        const data = await res.json();
-        setLeaderboard(data.scores || []);
-      } catch (e) {
-        console.error('Failed to fetch leaderboard', e);
+        const data = await getLeaderboard({
+          clientId: process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID,
+          game: 'polymeow',
+        });
+        setLeaderboard(data);
+      } catch (err) {
+        console.error('Failed to fetch leaderboard', err);
       }
-    }
+    };
     fetchLeaderboard();
   }, []);
 
@@ -55,31 +54,22 @@ export default function PlayPage() {
     if (hasPlayed) return;
 
     const correct = guess === dailyCat.name;
-    setResult(
-      correct
-        ? 'Correct! +10 points & 0.01 PMEOW 🎉'
-        : 'Wrong! Try again tomorrow 😿'
-    );
+    setResult(correct ? 'Correct! +10 points & 0.01 PMEOW 🎉' : 'Wrong! Try again tomorrow 😿');
     setHasPlayed(true);
     localStorage.setItem('polymeow_played', today);
 
     if (correct) {
-      const score =
-        Number(localStorage.getItem('polymeow_score') || '0') + 10;
+      const score = Number(localStorage.getItem('polymeow_score') || '0') + 10;
       localStorage.setItem('polymeow_score', score.toString());
     }
   };
 
-  if (!dailyCat) {
-    return <p className="text-center p-10">Loading today's cat...</p>;
-  }
+  if (!dailyCat) return <p className="text-center p-10">Loading today's cat...</p>;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-100 to-yellow-100 flex flex-col items-center justify-center p-4">
       <h1 className="text-4xl font-bold mb-8 text-purple-800">Polymeow 🐱</h1>
-      <p className="text-lg mb-6 text-gray-700">
-        Is this cat "Silver" or "Gold"?
-      </p>
+      <p className="text-lg mb-6 text-gray-700">Is this cat "Silver" or "Gold"?</p>
 
       <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
         <Image
@@ -110,26 +100,20 @@ export default function PlayPage() {
       ) : (
         <div className="text-center">
           <p className="text-2xl font-bold mb-4">{result}</p>
-          <p className="text-lg">
-            Total Score: {localStorage.getItem('polymeow_score') || '0'}
-          </p>
-          <p className="text-sm text-gray-600 mt-4">
-            Come back tomorrow for a new cat!
-          </p>
+          <p className="text-lg">Total Score: {localStorage.getItem('polymeow_score') || '0'}</p>
+          <p className="text-sm text-gray-600 mt-4">Come back tomorrow for a new cat!</p>
         </div>
       )}
 
-      {/* Leaderboard */}
-      <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md p-4">
-        <h2 className="text-2xl font-bold mb-4 text-center">Leaderboard</h2>
+      <h2 className="text-2xl font-bold mt-10 mb-4">Leaderboard</h2>
+      <div className="w-full max-w-md bg-white p-4 rounded-xl shadow-lg">
         {leaderboard.length === 0 ? (
           <p className="text-center text-gray-500">No players yet</p>
         ) : (
-          <ol className="list-decimal list-inside space-y-2">
+          <ol className="list-decimal list-inside">
             {leaderboard.map((player, idx) => (
-              <li key={idx} className="flex justify-between">
-                <span>{player.name}</span>
-                <span>{player.score}</span>
+              <li key={idx} className="mb-1">
+                {player.name} – {player.score}
               </li>
             ))}
           </ol>
