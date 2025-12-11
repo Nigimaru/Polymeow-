@@ -1,0 +1,7 @@
+{
+  "name": "Polymeow",
+  "description": "Daily cat guessing game",
+  "entrypoint": "/index.html",
+  "icon": "/icon.png",
+  "permissions": []
+}
